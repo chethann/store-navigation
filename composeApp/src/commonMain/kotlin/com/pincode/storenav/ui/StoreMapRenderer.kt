@@ -114,54 +114,6 @@ private fun DrawScope.drawAisle(aisle: Aisle) {
     }
 }
 
-private fun DrawScope.drawShelf(shelf: Shelf, scale: Float) {
-    val pos = shelf.position
-    val color = if (scale > 0.5f) Color.Red else Color.Gray
-
-    // Draw shelf outline
-    drawRect(
-        color = color,
-        topLeft = Offset(pos.x, pos.y),
-        size = Size(shelf.width, shelf.length),
-        style = Stroke(width = 2f)
-    )
-
-    // Draw rows if zoomed in enough
-    if (scale > 0.7f) {
-        shelf.rows.forEach { row ->
-            drawShelfRow(row)
-        }
-    }
-}
-
-private fun DrawScope.drawShelfRow(row: ShelfRow) {
-    val pos = row.position
-    
-    // Draw row outline
-    drawRect(
-        color = Color.Blue,
-        topLeft = Offset(pos.x, pos.y),
-        size = Size(row.width, row.length),
-        style = Stroke(width = 1f)
-    )
-
-    // Draw items if needed
-    row.items.forEach { item ->
-        drawItem(item)
-    }
-}
-
-private fun DrawScope.drawItem(item: StoreItem) {
-    val pos = item.position
-    
-    // Draw item as a small rectangle
-    drawRect(
-        color = Color.Green,
-        topLeft = Offset(pos.x, pos.y),
-        size = Size(item.width, item.length)
-    )
-}
-
 fun DrawScope.drawAislePreview(start: Offset, current: Offset, existingAisles: List<Aisle>, scale: Float) {
     val topLeft = Offset(
         x = min(start.x, current.x),
@@ -241,20 +193,3 @@ fun DrawScope.drawAislePreview(start: Offset, current: Offset, existingAisles: L
         strokeWidth = 1f
     )
 }
-
-// Add helper function to check for aisle collisions
-/*
-fun checkAisleCollision(newAisle: Aisle, existingAisles: List<Aisle>): Boolean {
-    val newRect = Rect(
-        offset = Offset(newAisle.position.x, newAisle.position.y),
-        size = Size(newAisle.width, newAisle.length)
-    )
-    
-    return existingAisles.any { aisle ->
-        val aisleRect = Rect(
-            offset = Offset(aisle.position.x, aisle.position.y),
-            size = Size(aisle.width, aisle.length)
-        )
-        newRect.overlaps(aisleRect)
-    }
-} */

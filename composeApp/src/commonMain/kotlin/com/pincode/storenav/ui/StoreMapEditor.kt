@@ -1,6 +1,7 @@
 package com.pincode.storenav.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -11,9 +12,15 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
@@ -31,8 +38,6 @@ import kotlin.math.abs
 fun StoreMapEditor(
     modifier: Modifier = Modifier
 ) {
-    var scale by remember { mutableStateOf(1f) }
-    var offset by remember { mutableStateOf(Offset.Zero) }
     var storeMap by remember { mutableStateOf<StoreMap?>(null) }
     var isDrawingFloor by remember { mutableStateOf(false) }
     var isDrawingAisle by remember { mutableStateOf(false) }
@@ -41,9 +46,29 @@ fun StoreMapEditor(
     var currentPoint by remember { mutableStateOf<Offset?>(null) }
     var hasCollision by remember { mutableStateOf(false) }
     var selectedAisle by remember { mutableStateOf<Aisle?>(null) }
-    
+    var scale by remember { mutableStateOf(1.5f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+
+    // Let's add min and max zoom constraints
+    val minScale = 0.5f
+    val maxScale = 5.0f
+    val moveStep = 10f
+
+
     // JSON formatter with pretty printing
     val json = remember { Json { prettyPrint = true } }
+
+    val focusRequester = remember { FocusRequester() }
+
+
+
+// After the Canvas declaration, use LaunchedEffect to request focus
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+
+
 
     // Functions to save and load store map
     fun saveStoreMap() {
@@ -133,6 +158,79 @@ fun StoreMapEditor(
             ) {
                 Text("Load Map")
             }
+
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = {
+                        // Zoom out logic
+                        scale = (scale - 0.25f).coerceAtLeast(minScale)
+                    },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("-")
+                }
+
+                Button(
+                    onClick = {
+                        // Zoom in logic
+                        scale = (scale + 0.25f).coerceAtMost(maxScale)
+                    }
+                ) {
+                    Text("+")
+                }
+            }
+
+            Text("Navigation Controls:", modifier = Modifier.padding(vertical = 4.dp))
+
+            // Up button
+            Button(
+                onClick = { offset = offset.copy(y = offset.y + moveStep) },
+                modifier = Modifier.width(120.dp)
+            ) {
+                Text("▲")
+            }
+
+            // Left, Reset Position, Right buttons
+            Row(
+                modifier = Modifier.padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = { offset = offset.copy(x = offset.x + moveStep) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Text("◄")
+                }
+
+                Button(
+                    onClick = { offset = Offset.Zero },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Text("0")
+                }
+
+                Button(
+                    onClick = { offset = offset.copy(x = offset.x - moveStep) },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Text("►")
+                }
+            }
+
+            // Down button
+            Button(
+                onClick = { offset = offset.copy(y = offset.y - moveStep) },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Text("▼")
+            }
+
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+
         }
 
         Column(modifier = Modifier.weight(1f)) {
@@ -168,6 +266,7 @@ fun StoreMapEditor(
                 Canvas(
                     modifier = Modifier
                         .fillMaxSize()
+                        .clipToBounds()
                         .pointerInput(Unit) {
                             detectTransformGestures { _, pan, zoom, _ ->
                                 if (!isDrawingAisle) {
@@ -190,6 +289,9 @@ fun StoreMapEditor(
                                         x = (position.x - offset.x) / scale,
                                         y = (position.y - offset.y) / scale
                                     )
+
+                                    println("Click position $position")
+                                    println("Click point $clickPoint")
                                     
                                     selectedAisle = storeMap!!.floor.aisles.find { aisle ->
                                         val isXInBounds = clickPoint.x >= aisle.position.x && 
@@ -260,20 +362,52 @@ fun StoreMapEditor(
                                 }
                             )
                         }
-                ) {
-                    scale(scale) {
-                        translate(offset.x, offset.y) {
-                            // Draw floor outline
-                            if (floorPoints.isNotEmpty()) {
-                                drawPoints(floorPoints)
-                            }
-
-                            // Draw store map elements if they exist
-                            storeMap?.let { map ->
-                                drawStoreMap(map)
+                        .focusable()
+                        .focusRequester(focusRequester)
+                        .onKeyEvent { keyEvent ->
+                            println("Key event: ${keyEvent.key}")
+                            when (keyEvent.key) {
+                                Key.DirectionLeft -> {
+                                    offset = offset.copy(x = offset.x + 20f)
+                                    true
+                                }
+                                Key.DirectionRight -> {
+                                    offset = offset.copy(x = offset.x - 20f)
+                                    true
+                                }
+                                Key.DirectionUp -> {
+                                    offset = offset.copy(y = offset.y + 20f)
+                                    true
+                                }
+                                Key.DirectionDown -> {
+                                    offset = offset.copy(y = offset.y - 20f)
+                                    true
+                                }
+                                else -> false
                             }
                         }
+
+
+                ) {
+
+                    withTransform({
+                        // First translate to the center or desired origin point
+                        translate(offset.x, offset.y)
+                        // Then scale around that point
+                        scale(scale, pivot = Offset(0f, 0f))
+                    }) {
+                        // Draw your content here
+                        if (floorPoints.isNotEmpty()) {
+                            drawPoints(floorPoints)
+                        }
+
+                        // Draw store map elements if they exist
+                        storeMap?.let { map ->
+                            drawStoreMap(map)
+                        }
                     }
+
+
 
                     // Draw aisle preview while dragging
                     if (isDrawingAisle && startPoint != null && currentPoint != null) {
@@ -305,14 +439,6 @@ fun StoreMapEditor(
             }
         }
     }
-}
-
-private fun drawPoints(points: List<Point>) {
-    // Implementation for drawing points and lines
-}
-
-private fun drawStoreMap(map: StoreMap) {
-    // Implementation for drawing the store map
 }
 
 private fun createPreviewAisle(start: Offset, current: Offset, offset: Offset, scale: Float): Aisle {
