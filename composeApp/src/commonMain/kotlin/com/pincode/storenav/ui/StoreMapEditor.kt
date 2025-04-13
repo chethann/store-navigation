@@ -486,7 +486,9 @@ private fun createPreviewAisle(start: Offset, current: Offset, offset: Offset, s
         position = position,
         width = width,
         length = length,
-        height = 200f
+        height = 200f,
+        sideOneShelves = emptyList(),
+        sideTwoShelves = emptyList()
     )
 }
 

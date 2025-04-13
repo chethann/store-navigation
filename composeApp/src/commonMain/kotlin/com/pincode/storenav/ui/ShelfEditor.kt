@@ -4,17 +4,17 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.pincode.storenav.model.Point
@@ -27,15 +27,24 @@ import kotlin.math.abs
 fun ShelfEditor(
     shelf: Shelf,
     onShelfUpdate: (Shelf) -> Unit,
+    numRowsToAdd: String,
+    onNumRowsToAddChange: (String) -> Unit,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isParentAisleHorizontal: Boolean = true // Add parent aisle orientation parameter
 ) {
     var currentRows by remember(shelf) { mutableStateOf(shelf.rows) }
-    var scale by remember { mutableStateOf(1f) }
+    var scale by remember { mutableStateOf(4f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
-    var isDrawingRow by remember { mutableStateOf(false) }
-    var startPoint by remember { mutableStateOf<Offset?>(null) }
-    var currentPoint by remember { mutableStateOf<Offset?>(null) }
+    
+    // Estimate shelf dimensions based on weight and orientation
+    val (estimatedWidth, estimatedHeight) = if (isParentAisleHorizontal) {
+        // For horizontal aisles, shelves are along the sides (vertical orientation)
+        50f to (shelf.weight * 30f)
+    } else {
+        // For vertical aisles, shelves are at top/bottom (horizontal orientation)
+        (shelf.weight * 30f) to 50f
+    }
 
     // Center the shelf in the view initially
     LaunchedEffect(Unit) {
@@ -44,114 +53,106 @@ fun ShelfEditor(
 
     Column(modifier = modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text("Shelf Editor") },
+            title = { Text("Shelf Editor (Weight: ${shelf.weight})") },
             navigationIcon = {
                 Button(onClick = onBack) {
                     Text("Back")
                 }
-            },
-            actions = {
-                Button(
-                    onClick = { isDrawingRow = !isDrawingRow },
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Text(if (isDrawingRow) "Cancel Row" else "Add Row")
-                }
             }
         )
+
+        // Add row controls
+        Row(
+            modifier = Modifier.padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            OutlinedTextField(
+                value = numRowsToAdd,
+                onValueChange = onNumRowsToAddChange,
+                label = { Text("Number of Rows") },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(8.dp))
+            Button(onClick = {
+                val rowCount = numRowsToAdd.toIntOrNull() ?: return@Button
+                if (rowCount <= 0) return@Button
+                
+                // Calculate row dimensions based on orientation
+                val rowSpacing = 2f
+                
+                val newRows = if (isParentAisleHorizontal) {
+                    // For horizontal aisles (shelves on left/right)
+                    // Rows should be VERTICAL (running parallel to the aisle)
+                    val rowWidth = (estimatedWidth - ((rowCount - 1) * rowSpacing)) / rowCount
+                    
+                    (0 until rowCount).map { index ->
+                        val xPosition = index * (rowWidth + rowSpacing)
+                        ShelfRow(
+                            id = UUID.randomUUID().toString(),
+                            position = Point(x = xPosition, y = 2f),
+                            width = rowWidth,
+                            length = estimatedHeight - 4f, // Small margin on top/bottom
+                            height = 15f
+                        )
+                    }
+                } else {
+                    // For vertical aisles (shelves on top/bottom)
+                    // Rows should be HORIZONTAL (running parallel to the aisle)
+                    val rowHeight = (estimatedHeight - ((rowCount - 1) * rowSpacing)) / rowCount
+                    
+                    (0 until rowCount).map { index ->
+                        val yPosition = index * (rowHeight + rowSpacing)
+                        ShelfRow(
+                            id = UUID.randomUUID().toString(),
+                            position = Point(x = 2f, y = yPosition),
+                            width = estimatedWidth - 4f, // Small margin on sides
+                            length = rowHeight,
+                            height = 15f
+                        )
+                    }
+                }
+                
+                // Update the shelf with new rows
+                onShelfUpdate(shelf.copy(rows = newRows))
+                currentRows = newRows
+            }) {
+                Text("Generate Rows")
+            }
+        }
 
         Box(modifier = Modifier.weight(1f)) {
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
+                    .clipToBounds()
                     .pointerInput(Unit) {
                         detectTransformGestures { _, pan, zoom, _ ->
-                            if (!isDrawingRow) {
-                                scale *= zoom
-                                offset += pan
-                            }
+                            scale *= zoom
+                            offset += pan
                         }
-                    }
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { position ->
-                                if (isDrawingRow) {
-                                    startPoint = position
-                                    currentPoint = position
-                                }
-                            },
-                            onDrag = { change, _ ->
-                                if (isDrawingRow) {
-                                    currentPoint = change.position
-                                    change.consume()
-                                }
-                            },
-                            onDragEnd = {
-                                if (isDrawingRow && startPoint != null && currentPoint != null) {
-                                    val newRow = createRow(
-                                        start = startPoint!!,
-                                        end = currentPoint!!,
-                                        offset = offset,
-                                        scale = scale
-                                    )
-                                    
-                                    // Only add row if it's within shelf bounds
-                                    if (isRowWithinShelf(newRow, shelf)) {
-                                        // Update local state first
-                                        currentRows = currentRows + newRow
-                                        // Then update parent with all rows
-                                        onShelfUpdate(shelf.copy(rows = currentRows))
-                                    }
-
-                                    startPoint = null
-                                    currentPoint = null
-                                    isDrawingRow = false
-                                }
-                            },
-                            onDragCancel = {
-                                startPoint = null
-                                currentPoint = null
-                            }
-                        )
                     }
             ) {
-                scale(scale) {
-                    translate(offset.x, offset.y) {
-                        // Draw shelf outline
+                withTransform({
+                    translate(offset.x, offset.y)
+                    //scale(scale)
+                }) {
+                    // Draw shelf outline based on estimated dimensions
+                    drawRect(
+                        color = Color.Red,
+                        topLeft = Offset(0f, 0f),
+                        size = Size(estimatedWidth, estimatedHeight),
+                        style = Stroke(width = 2f)
+                    )
+
+                    // Draw all rows
+                    currentRows.forEach { row ->
                         drawRect(
-                            color = Color.Red,
-                            topLeft = Offset(0f, 0f),
-                            size = androidx.compose.ui.geometry.Size(
-                                shelf.width,
-                                shelf.length
-                            ),
+                            color = Color.Blue,
+                            topLeft = Offset(row.position.x, row.position.y),
+                            size = Size(row.width, row.length),
                             style = Stroke(width = 2f)
                         )
-
-                        // Draw all rows
-                        currentRows.forEach { row ->
-                            drawRect(
-                                color = Color.Blue,
-                                topLeft = Offset(row.position.x, row.position.y),
-                                size = androidx.compose.ui.geometry.Size(
-                                    row.width,
-                                    row.length
-                                ),
-                                style = Stroke(width = 2f)
-                            )
-                        }
                     }
-                }
-
-                // Draw row preview while dragging
-                if (isDrawingRow && startPoint != null && currentPoint != null) {
-                    drawRowPreview(
-                        start = startPoint!!,
-                        current = currentPoint!!,
-                        scale = scale,
-                        offset = offset,
-                        shelf = shelf
-                    )
                 }
             }
         }
@@ -191,6 +192,7 @@ private fun createRow(
     )
 }
 
+/*
 private fun isRowWithinShelf(row: ShelfRow, shelf: Shelf): Boolean {
     return row.position.x >= 0 &&
            row.position.y >= 0 &&
@@ -241,4 +243,4 @@ private fun DrawScope.drawRowPreview(
             )
         }
     }
-} 
+} */

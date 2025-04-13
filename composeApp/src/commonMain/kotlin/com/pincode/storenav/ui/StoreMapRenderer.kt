@@ -81,35 +81,190 @@ private fun DrawScope.drawAisle(aisle: Aisle) {
         style = Stroke(width = 2f)
     )
 
-    // Draw shelves within aisle
-    aisle.shelves.forEach { shelf ->
-        val shelfPos = Offset(
-            x = aisle.position.x + shelf.position.x,
-            y = aisle.position.y + shelf.position.y
-        )
-        
-        // Draw shelf outline
-        drawRect(
-            color = Color.Red,
-            topLeft = shelfPos,
-            size = Size(shelf.width, shelf.length),
-            style = Stroke(width = 1.5f)
-        )
+    val spacing = 4f
+    val isHorizontal = aisle.length > aisle.width  // Determine orientation based on dimensions
 
-        // Draw rows within shelf
-        shelf.rows.forEach { row ->
-            val rowPos = Offset(
-                x = shelfPos.x + row.position.x,
-                y = shelfPos.y + row.position.y
-            )
+    if (isHorizontal) {
+        // Horizontal layout (length > width)
+        val shelfAreaWidth = (aisle.width - spacing) / 2
+
+        // Draw side one shelves (left side)
+        var currentY = aisle.position.y + spacing
+        val totalWeightSideOne = aisle.sideOneShelves.sumOf { it.weight.toDouble() }.toFloat()
+        val availableHeightSideOne = aisle.length - (spacing * (aisle.sideOneShelves.size + 1))
+
+        aisle.sideOneShelves.forEach { shelf ->
+            // Calculate shelf height based on weight and available space
+            val shelfHeight = if (totalWeightSideOne > 0) {
+                (shelf.weight / totalWeightSideOne) * availableHeightSideOne
+            } else {
+                0f
+            }
+
+            // Draw the shelf
+            val shelfLeft = aisle.position.x + spacing
+            val shelfWidth = shelfAreaWidth - spacing
             
-            // Draw row outline
             drawRect(
-                color = Color.Blue,
-                topLeft = rowPos,
-                size = Size(row.width, row.length),
-                style = Stroke(width = 1f)
+                color = Color.Red,
+                topLeft = Offset(shelfLeft, currentY),
+                size = Size(shelfWidth, shelfHeight),
+                style = Stroke(width = 1.5f)
             )
+
+            // Draw rows within the shelf - rows should be vertical for vertical shelves
+            if (shelf.rows.isNotEmpty()) {
+                val rowSpacing = 2f
+                val rowAreaWidth = shelfWidth - 4f // Small margin on left and right
+                val rowWidth = (rowAreaWidth - (rowSpacing * (shelf.rows.size - 1))) / shelf.rows.size
+                
+                shelf.rows.forEachIndexed { index, row ->
+                    val rowX = shelfLeft + 2f + (index * (rowWidth + rowSpacing))
+                    drawRect(
+                        color = Color.Blue,
+                        topLeft = Offset(rowX, currentY + 2f),
+                        size = Size(rowWidth, shelfHeight - 4f),
+                        style = Stroke(width = 1f)
+                    )
+                }
+            }
+
+            currentY += shelfHeight + spacing
+        }
+
+        // Draw side two shelves (right side)
+        currentY = aisle.position.y + spacing
+        val totalWeightSideTwo = aisle.sideTwoShelves.sumOf { it.weight.toDouble() }.toFloat()
+        val availableHeightSideTwo = aisle.length - (spacing * (aisle.sideTwoShelves.size + 1))
+
+        aisle.sideTwoShelves.forEach { shelf ->
+            // Calculate shelf height based on weight and available space
+            val shelfHeight = if (totalWeightSideTwo > 0) {
+                (shelf.weight / totalWeightSideTwo) * availableHeightSideTwo
+            } else {
+                0f
+            }
+
+            // Draw the shelf
+            val shelfLeft = aisle.position.x + shelfAreaWidth + spacing
+            val shelfWidth = shelfAreaWidth - spacing
+            
+            drawRect(
+                color = Color.Green,
+                topLeft = Offset(shelfLeft, currentY),
+                size = Size(shelfWidth, shelfHeight),
+                style = Stroke(width = 1.5f)
+            )
+
+            // Draw rows within the shelf - rows should be vertical for vertical shelves
+            if (shelf.rows.isNotEmpty()) {
+                val rowSpacing = 2f
+                val rowAreaWidth = shelfWidth - 4f // Small margin on left and right
+                val rowWidth = (rowAreaWidth - (rowSpacing * (shelf.rows.size - 1))) / shelf.rows.size
+                
+                shelf.rows.forEachIndexed { index, row ->
+                    val rowX = shelfLeft + 2f + (index * (rowWidth + rowSpacing))
+                    drawRect(
+                        color = Color.Blue,
+                        topLeft = Offset(rowX, currentY + 2f),
+                        size = Size(rowWidth, shelfHeight - 4f),
+                        style = Stroke(width = 1f)
+                    )
+                }
+            }
+
+            currentY += shelfHeight + spacing
+        }
+    } else {
+        // Vertical layout (width > length)
+        val shelfAreaHeight = (aisle.length - spacing) / 2
+
+        // Draw side one shelves (top side)
+        var currentX = aisle.position.x + spacing
+        val totalWeightSideOne = aisle.sideOneShelves.sumOf { it.weight.toDouble() }.toFloat()
+        val availableWidthSideOne = aisle.width - (spacing * (aisle.sideOneShelves.size + 1))
+
+        aisle.sideOneShelves.forEach { shelf ->
+            // Calculate shelf width based on weight and available space
+            val shelfWidth = if (totalWeightSideOne > 0) {
+                (shelf.weight / totalWeightSideOne) * availableWidthSideOne
+            } else {
+                0f
+            }
+
+            // Draw the shelf
+            val shelfTop = aisle.position.y + spacing
+            val shelfHeight = shelfAreaHeight - spacing
+            
+            drawRect(
+                color = Color.Red,
+                topLeft = Offset(currentX, shelfTop),
+                size = Size(shelfWidth, shelfHeight),
+                style = Stroke(width = 1.5f)
+            )
+
+            // Draw rows within the shelf - rows should be horizontal for horizontal shelves
+            if (shelf.rows.isNotEmpty()) {
+                val rowSpacing = 2f
+                val rowAreaHeight = shelfHeight - 4f // Small margin on top and bottom
+                val rowHeight = (rowAreaHeight - (rowSpacing * (shelf.rows.size - 1))) / shelf.rows.size
+                
+                shelf.rows.forEachIndexed { index, row ->
+                    val rowY = shelfTop + 2f + (index * (rowHeight + rowSpacing))
+                    drawRect(
+                        color = Color.Blue,
+                        topLeft = Offset(currentX + 2f, rowY),
+                        size = Size(shelfWidth - 4f, rowHeight),
+                        style = Stroke(width = 1f)
+                    )
+                }
+            }
+
+            currentX += shelfWidth + spacing
+        }
+
+        // Draw side two shelves (bottom side)
+        currentX = aisle.position.x + spacing
+        val totalWeightSideTwo = aisle.sideTwoShelves.sumOf { it.weight.toDouble() }.toFloat()
+        val availableWidthSideTwo = aisle.width - (spacing * (aisle.sideTwoShelves.size + 1))
+
+        aisle.sideTwoShelves.forEach { shelf ->
+            // Calculate shelf width based on weight and available space
+            val shelfWidth = if (totalWeightSideTwo > 0) {
+                (shelf.weight / totalWeightSideTwo) * availableWidthSideTwo
+            } else {
+                0f
+            }
+
+            // Draw the shelf
+            val shelfTop = aisle.position.y + shelfAreaHeight + spacing
+            val shelfHeight = shelfAreaHeight - spacing
+            
+            drawRect(
+                color = Color.Green,
+                topLeft = Offset(currentX, shelfTop),
+                size = Size(shelfWidth, shelfHeight),
+                style = Stroke(width = 1.5f)
+            )
+
+            // Draw rows within the shelf - rows should be horizontal for horizontal shelves
+            if (shelf.rows.isNotEmpty()) {
+                val rowSpacing = 2f
+                val rowAreaHeight = shelfHeight - 4f // Small margin on top and bottom
+                val rowHeight = (rowAreaHeight - (rowSpacing * (shelf.rows.size - 1))) / shelf.rows.size
+                
+                shelf.rows.forEachIndexed { index, row ->
+                    val rowY = shelfTop + 2f + (index * (rowHeight + rowSpacing))
+                    drawRect(
+                        color = Color.Blue,
+                        topLeft = Offset(currentX + 2f, rowY),
+                        size = Size(shelfWidth - 4f, rowHeight),
+                        style = Stroke(width = 1f)
+                    )
+                }
+            }
+
+            currentX += shelfWidth + spacing
         }
     }
 }

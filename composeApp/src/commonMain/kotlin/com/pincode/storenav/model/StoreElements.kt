@@ -23,16 +23,14 @@ data class Aisle(
     val width: Float,
     val length: Float,
     val height: Float = 200f,
-    val shelves: List<Shelf> = emptyList()
+    val sideOneShelves: List<Shelf> = emptyList(),
+    val sideTwoShelves: List<Shelf> = emptyList()
 )
 
 @Serializable
 data class Shelf(
     val id: String,
-    val position: Point,
-    val width: Float,
-    val length: Float,
-    val height: Float,
+    val weight: Float, // Weight determines the space taken by the shelf
     val rows: List<ShelfRow> = emptyList()
 )
 
