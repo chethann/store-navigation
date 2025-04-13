@@ -268,12 +268,30 @@ fun StoreMapEditor(
                         .fillMaxSize()
                         .clipToBounds()
                         .pointerInput(Unit) {
-                            detectTransformGestures { _, pan, zoom, _ ->
-                                if (!isDrawingAisle) {
-                                    scale *= zoom
-                                    offset += pan
-                                }
-                            }
+                            detectTransformGestures (
+                                onGesture = { centroid, pan, gestureZoom
+                                              , rotation ->
+
+                                    if (!isDrawingAisle) {
+                                        // Calculate new scale
+                                        val newScale = (scale * gestureZoom).coerceIn(minScale, maxScale)
+
+                                        // Adjust offset to zoom toward pointer position
+                                        // This is the key improvement for natural pinch-zoom behavior
+                                        val newOffset = if (gestureZoom != 1f) {
+                                            // When zooming, we need to keep the point under the centroid fixed
+                                            val focalPoint = centroid - offset
+                                            val scaledFocalPoint = focalPoint * (newScale / scale)
+                                            offset + (focalPoint - scaledFocalPoint)
+                                        } else {
+                                            // When just panning
+                                            offset + pan
+                                        }
+
+                                        scale = newScale
+                                        offset = newOffset
+                                    }
+                                })
                         }
                         .pointerInput(Unit) {
                             detectTapGestures { position ->
@@ -312,7 +330,8 @@ fun StoreMapEditor(
                                         hasCollision = false
                                     }
                                 },
-                                onDrag = { change: PointerInputChange, _ ->
+                                onDrag = { change: PointerInputChange, dragAmount
+                                    ->
                                     if (isDrawingAisle) {
                                         currentPoint = change.position
                                         
@@ -332,6 +351,9 @@ fun StoreMapEditor(
                                         }
                                         
                                         change.consume()
+                                    } else {
+                                        change.consume()
+                                        offset += dragAmount
                                     }
                                 },
                                 onDragEnd = {
