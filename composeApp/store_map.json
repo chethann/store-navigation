@@ -1,192 +1,198 @@
 {
     "floor": {
-        "id": "d8530a1d-89e4-4130-a129-27e21ba22a48",
+        "id": "cecc3ddd-26da-4b50-8824-6a110fc40f49",
         "vertices": [
             {
-                "x": 296.0,
-                "y": 100.0
+                "x": 205.75,
+                "y": 84.0
             },
             {
-                "x": 1660.0,
-                "y": 108.0
+                "x": 1963.75,
+                "y": 62.0
             },
             {
-                "x": 1676.0,
-                "y": 906.0
+                "x": 1979.75,
+                "y": 1212.0
             },
             {
-                "x": 352.0,
-                "y": 950.0
+                "x": 165.75,
+                "y": 1200.0
             }
         ],
         "aisles": [
             {
-                "id": "65f97af0-d5e7-49e2-972b-9f9cb259cfc0",
+                "id": "3e16cc0f-14e4-4ae7-b0b1-6e7fd2964f4e",
                 "position": {
-                    "x": 414.0,
-                    "y": 166.0
+                    "x": 279.75,
+                    "y": 116.0
                 },
-                "width": 1040.0,
-                "length": 130.0,
-                "sideOneShelves": [
-                    {
-                        "id": "5db19b9d-9beb-4e45-9b1c-aa447d2fdc9d",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "28ccf16c-a338-46c3-9b0d-b71a813da764",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "5998ae79-0ef8-40e6-9a82-60f7cb9de5c9",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "7ab3cd2b-a5b5-47ff-9cba-4b28d834cc76",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "29cfceae-8aad-4fa0-af07-59d303d2d62e",
-                        "weight": 1.0
-                    }
-                ],
+                "width": 1628.0,
+                "length": 116.0,
                 "sideTwoShelves": [
                     {
-                        "id": "5db19b9d-9beb-4e45-9b1c-aa447d2fdc9d",
+                        "id": "side2_7860a2aa",
                         "weight": 1.0
                     },
                     {
-                        "id": "28ccf16c-a338-46c3-9b0d-b71a813da764",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "5998ae79-0ef8-40e6-9a82-60f7cb9de5c9",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "7ab3cd2b-a5b5-47ff-9cba-4b28d834cc76",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "29cfceae-8aad-4fa0-af07-59d303d2d62e",
+                        "id": "side2_7c9f3eaf",
                         "weight": 1.0
                     }
                 ]
             },
             {
-                "id": "eccd4693-41f1-4f72-bb1e-e5dc7c29e8ba",
+                "id": "3b9ee5ca-499b-4f05-bc37-96f04a94cc1f",
                 "position": {
-                    "x": 416.0,
-                    "y": 376.0
+                    "x": 275.75,
+                    "y": 364.0
                 },
-                "width": 184.0,
-                "length": 538.0,
+                "width": 140.0,
+                "length": 736.0,
                 "sideOneShelves": [
                     {
-                        "id": "6992a33f-5f2a-4108-9536-749ab4a2d793",
+                        "id": "side1_c9b080cd",
                         "weight": 1.0
                     },
                     {
-                        "id": "65049a95-7a2d-45dc-960c-7ec6d19af32b",
+                        "id": "side1_49252124",
                         "weight": 1.0
                     },
                     {
-                        "id": "8911f6c1-4f82-4b1f-b426-3d965b2ab45c",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "cefeea44-827e-4ead-8e83-a5867bfd46b7",
+                        "id": "side1_c544496e",
                         "weight": 1.0
                     }
                 ],
                 "sideTwoShelves": [
                     {
-                        "id": "6992a33f-5f2a-4108-9536-749ab4a2d793",
+                        "id": "side2_4473f5d1",
                         "weight": 1.0
                     },
                     {
-                        "id": "65049a95-7a2d-45dc-960c-7ec6d19af32b",
+                        "id": "side2_1695a77e",
                         "weight": 1.0
                     },
                     {
-                        "id": "8911f6c1-4f82-4b1f-b426-3d965b2ab45c",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "cefeea44-827e-4ead-8e83-a5867bfd46b7",
+                        "id": "side2_515cbf03",
                         "weight": 1.0
                     }
                 ]
             },
             {
-                "id": "5ca7c932-49ab-42b0-85f6-26491486435c",
+                "id": "5dfb7358-7db3-4a26-9ac4-c06452ce8fcc",
                 "position": {
-                    "x": 722.0,
-                    "y": 366.0
+                    "x": 579.75,
+                    "y": 408.0
                 },
-                "width": 826.0,
+                "width": 1304.0,
+                "length": 114.0,
+                "sideOneShelves": [
+                    {
+                        "id": "side1_eaa3cab0",
+                        "weight": 1.0
+                    },
+                    {
+                        "id": "side1_3498b783",
+                        "weight": 1.0
+                    },
+                    {
+                        "id": "side1_223ad8df",
+                        "weight": 1.0
+                    }
+                ],
+                "sideTwoShelves": [
+                    {
+                        "id": "side2_9028d030",
+                        "weight": 1.0
+                    },
+                    {
+                        "id": "side2_e66d4f70",
+                        "weight": 1.0
+                    },
+                    {
+                        "id": "side2_835a2375",
+                        "weight": 1.0
+                    }
+                ]
+            },
+            {
+                "id": "ac8cfeb7-e83c-4216-810f-43302ed3df96",
+                "position": {
+                    "x": 591.75,
+                    "y": 648.0
+                },
+                "width": 1308.0,
                 "length": 124.0,
                 "sideOneShelves": [
                     {
-                        "id": "eab7534b-a443-44c4-9bdd-93b62dad2132",
+                        "id": "side1_be31ff6e",
                         "weight": 1.0
                     },
                     {
-                        "id": "c77a7f88-5309-4d5f-98cc-63c264e7192d",
+                        "id": "side1_c1f8d668",
                         "weight": 1.0
                     },
                     {
-                        "id": "71bca47d-b271-4d40-8732-27deed83522e",
+                        "id": "side1_641ae447",
                         "weight": 1.0
                     },
                     {
-                        "id": "150c96ab-b799-47b7-8ba0-781dbfc16090",
+                        "id": "side1_da718800",
                         "weight": 1.0
-                    },
-                    {
-                        "id": "6c9b1a3e-e2a1-4d76-935a-729a1d085d06",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "b1bbd820-a888-4738-b40f-da0f3b5db40c",
-                        "weight": 3.0
                     }
                 ],
                 "sideTwoShelves": [
                     {
-                        "id": "eab7534b-a443-44c4-9bdd-93b62dad2132",
+                        "id": "side2_5e3215ba",
                         "weight": 1.0
                     },
                     {
-                        "id": "c77a7f88-5309-4d5f-98cc-63c264e7192d",
+                        "id": "side2_1604ad4f",
                         "weight": 1.0
                     },
                     {
-                        "id": "71bca47d-b271-4d40-8732-27deed83522e",
+                        "id": "side2_6439d802",
                         "weight": 1.0
                     },
                     {
-                        "id": "150c96ab-b799-47b7-8ba0-781dbfc16090",
+                        "id": "side2_fb2eb23d",
                         "weight": 1.0
-                    },
-                    {
-                        "id": "6c9b1a3e-e2a1-4d76-935a-729a1d085d06",
-                        "weight": 1.0
-                    },
-                    {
-                        "id": "b1bbd820-a888-4738-b40f-da0f3b5db40c",
-                        "weight": 3.0
                     }
                 ]
             },
             {
-                "id": "0f6d3058-002d-4c21-ba6f-ca89a33d9bc5",
+                "id": "337819a2-1a3d-42d4-8cd2-b24beea6b0c4",
                 "position": {
-                    "x": 732.0,
-                    "y": 530.0
+                    "x": 688.0,
+                    "y": 876.0
                 },
-                "width": 808.0,
-                "length": 44.0
+                "width": 1090.0,
+                "length": 134.0
+            },
+            {
+                "id": "23166146-2452-4166-b0eb-d6828addcb1e",
+                "position": {
+                    "x": 476.0,
+                    "y": 798.0
+                },
+                "width": 102.0,
+                "length": 112.0
+            },
+            {
+                "id": "5d2a50bc-48a0-43e1-ae35-bef6bcaf3607",
+                "position": {
+                    "x": 1324.0,
+                    "y": 282.0
+                },
+                "width": 354.0,
+                "length": 72.0
+            },
+            {
+                "id": "c8640c4f-0e15-450e-8078-81c2788eb025",
+                "position": {
+                    "x": 466.0,
+                    "y": 586.0
+                },
+                "width": 114.0,
+                "length": 200.0
             }
         ]
     }

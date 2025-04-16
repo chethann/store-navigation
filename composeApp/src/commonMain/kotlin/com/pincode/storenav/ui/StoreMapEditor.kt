@@ -28,6 +28,7 @@ import com.pincode.storenav.model.Aisle
 import com.pincode.storenav.model.Point
 import com.pincode.storenav.model.StoreFloor
 import com.pincode.storenav.model.StoreMap
+import com.pincode.storenav.util.PathFinder
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -48,6 +49,9 @@ fun StoreMapEditor(
     var selectedAisle by remember { mutableStateOf<Aisle?>(null) }
     var scale by remember { mutableStateOf(1.5f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
+    var navigationPath by remember { mutableStateOf<List<PathFinder.WaypointData>?>(null) }
+
+
 
     // Let's add min and max zoom constraints
     val minScale = 0.5f
@@ -125,6 +129,17 @@ fun StoreMapEditor(
                 .fillMaxHeight()
                 .padding(8.dp)
         ) {
+
+        
+
+            StoreNavigationControls(
+                storeMap = storeMap,
+                onPathCalculated = { path ->
+                    navigationPath = path
+                }
+            )
+
+
             Text(
                 text = "Tools",
                 modifier = Modifier.padding(8.dp)
@@ -426,6 +441,10 @@ fun StoreMapEditor(
                         // Draw store map elements if they exist
                         storeMap?.let { map ->
                             drawStoreMap(map)
+                        }
+
+                        navigationPath?.let {
+                            drawNavigationPath(it)
                         }
                     }
 

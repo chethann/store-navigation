@@ -33,6 +33,10 @@ fun AisleEditor(
     var shelfWeight by remember { mutableStateOf("1.0") }
     var selectedShelf by remember { mutableStateOf<Pair<Shelf, Boolean>?>(null) } // Shelf and side (true = side one, false = side two)
     var numRowsToAdd by remember { mutableStateOf("1") }
+    
+    // Tab selection for adding to specific sides
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabTitles = listOf("Both Sides", "Side One Only", "Side Two Only")
 
     // Center the aisle in the view initially
     LaunchedEffect(Unit) {
@@ -78,6 +82,17 @@ fun AisleEditor(
             }
         )
 
+        // Add tabs for shelf addition mode
+        TabRow(selectedTabIndex = selectedTabIndex) {
+            tabTitles.forEachIndexed { index, title ->
+                Tab(
+                    selected = selectedTabIndex == index,
+                    onClick = { selectedTabIndex = index },
+                    text = { Text(title) }
+                )
+            }
+        }
+
         // Add shelf weight input
         Row(
             modifier = Modifier.padding(8.dp),
@@ -94,16 +109,44 @@ fun AisleEditor(
                 val weight = shelfWeight.toFloatOrNull() ?: return@Button
                 if (weight <= 0) return@Button
                 
-                val newShelf = Shelf(
-                    id = UUID.randomUUID().toString(),
-                    weight = weight
-                )
+                // Create updated aisle based on tab selection
+                val updatedAisle = when (selectedTabIndex) {
+                    0 -> { // Both sides
+                        val sideOneShelf = Shelf(
+                            id = "side1_" + UUID.randomUUID().toString().substring(0, 8),
+                            weight = weight
+                        )
+                        val sideTwoShelf = Shelf(
+                            id = "side2_" + UUID.randomUUID().toString().substring(0, 8),
+                            weight = weight
+                        )
+                        aisle.copy(
+                            sideOneShelves = aisle.sideOneShelves + sideOneShelf,
+                            sideTwoShelves = aisle.sideTwoShelves + sideTwoShelf
+                        )
+                    }
+                    1 -> { // Side one only
+                        val sideOneShelf = Shelf(
+                            id = "side1_" + UUID.randomUUID().toString().substring(0, 8),
+                            weight = weight
+                        )
+                        aisle.copy(
+                            sideOneShelves = aisle.sideOneShelves + sideOneShelf
+                        )
+                    }
+                    2 -> { // Side two only
+                        val sideTwoShelf = Shelf(
+                            id = "side2_" + UUID.randomUUID().toString().substring(0, 8),
+                            weight = weight
+                        )
+                        aisle.copy(
+                            sideTwoShelves = aisle.sideTwoShelves + sideTwoShelf
+                        )
+                    }
+                    else -> aisle
+                }
                 
-                // Update both sides of the aisle
-                onAisleUpdate(aisle.copy(
-                    sideOneShelves = aisle.sideOneShelves + newShelf,
-                    sideTwoShelves = aisle.sideTwoShelves + newShelf
-                ))
+                onAisleUpdate(updatedAisle)
             }) {
                 Text("Add Shelf")
             }
@@ -394,4 +437,4 @@ private fun calculateShelfSize(weight: Float, aisle: Aisle, isHorizontal: Boolea
     } else {
         0f
     }
-} 
+}
